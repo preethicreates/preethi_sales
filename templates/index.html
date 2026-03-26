@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales Prediction</title>
+</head>
+<body style="text-align:center; margin-top:50px;">
+
+    <h2>Sales Prediction App</h2>
+
+    <form action="/predict" method="post">
+        <input type="number" name="Item_MRP" placeholder="Enter Item MRP" required>
+        <br><br>
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if prediction %}
+        <h3>Prediction: {{ prediction }}</h3>
+    {% endif %}
+
+</body>
+</html>
