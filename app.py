@@ -1,25 +1,44 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, render_template, jsonify
 import joblib
 import numpy as np
 
 app = Flask(__name__)
 
+# Load model and scaler
 model = joblib.load('model.joblib')
 scaler = joblib.load('scaler.joblib')
 
+# Home route (HTML page)
 @app.route('/')
 def home():
-    return "Sales Prediction API Running"
+    return render_template('index.html')
 
+# Prediction from HTML form
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json()
-    mrp = data['Item_MRP']
+    try:
+        mrp = float(request.form['Item_MRP'])
+        scaled = scaler.transform([[mrp]])
+        prediction = model.predict(scaled)
 
-    scaled = scaler.transform([[mrp]])
-    prediction = model.predict(scaled)
+        return render_template('index.html', prediction=round(prediction[0], 2))
+    
+    except Exception as e:
+        return f"Error: {str(e)}"
 
-    return jsonify({'prediction': float(prediction[0])})
+# Optional API (JSON)
+@app.route('/api_predict', methods=['POST'])
+def api_predict():
+    try:
+        data = request.get_json()
+        mrp = float(data['Item_MRP'])
+        scaled = scaler.transform([[mrp]])
+        prediction = model.predict(scaled)
 
-if __name__ == '__main__':
+        return jsonify({'prediction': float(prediction[0])})
+    
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+if __name__ == "__main__":
     app.run()
